@@ -1,0 +1,30 @@
+from flask import Flask, request 
+import telegram 
+import openai 
+import os
+
+TOKEN = os.environ.get("7477194368:AAFUi2lv0PVmwja6ec0lU9xaHDOeNtDCIfo") 
+openai.api_key = os.environ.get("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") 
+BOT_URL = f"https://api.telegram.org/bot{TOKEN}"
+
+bot = telegram.Bot(token=TOKEN) 
+app = Flask(name)
+
+@app.route("/", methods=["POST"]) def webhook(): update = telegram.Update.de_json(request.get_json(force=True), bot) chat_id = update.message.chat.id user_message = update.message.text
+
+# پاسخ با استفاده از OpenAI
+try:
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[{"role": "user", "content": user_message}]
+    )
+    reply = response["choices"][0]["message"]["content"]
+except Exception as e:
+    reply = "مشکلی پیش اومده. لطفاً دوباره امتحان کن."
+
+bot.sendMessage(chat_id=chat_id, text=reply)
+return "ok"
+
+@app.route("/", methods=["GET"]) def index(): return "ربات فعال است."
+
+if name == "main": app.run(debug=True)
